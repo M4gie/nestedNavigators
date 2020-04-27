@@ -129,7 +129,9 @@ function QRScanner(props: AppProps<"QRScanner">) {
       <Text>QRScranner</Text>
       <Button
         title="Profile"
-        onPress={() => props.navigation.navigate("Profile")}
+        onPress={
+          () => props.navigation.navigate("Profile") // No overload matches this call.
+        }
       />
     </View>
   );
