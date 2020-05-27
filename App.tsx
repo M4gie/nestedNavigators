@@ -1,38 +1,14 @@
-import {
-  createBottomTabNavigator,
-  BottomTabNavigationProp,
-} from "@react-navigation/bottom-tabs";
-import {
-  RouteProp,
-  CompositeNavigationProp,
-  NavigationContainer,
-} from "@react-navigation/native";
-import {
-  createStackNavigator,
-  StackNavigationProp,
-} from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer, Link } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
-import { Button, Text, View, StyleSheet } from "react-native";
-
-type AppStackParamList = {
-  Home: undefined;
-  QRScanner: { uuid: string } | undefined;
-};
-
-type AppRouteProp<T extends keyof AppStackParamList> = RouteProp<
+import { Text, View, StyleSheet } from "react-native";
+import {
   AppStackParamList,
-  T
->;
-
-type AppNavigationProp<T extends keyof AppStackParamList> = StackNavigationProp<
-  AppStackParamList,
-  T
->;
-
-type AppProps<T extends keyof AppStackParamList> = {
-  route: AppRouteProp<T>;
-  navigation: AppNavigationProp<T>;
-};
+  PrimaryTabParamList,
+  ProfileStackParamList,
+  ContactStackParamList,
+} from "./types";
 
 const StackApp = createStackNavigator<AppStackParamList>();
 
@@ -45,27 +21,6 @@ function AppNavigator() {
   );
 }
 
-export type PrimaryTabParamList = {
-  Home: undefined;
-  Profile: undefined;
-};
-
-export type PrimaryTabRouteProp<
-  T extends keyof PrimaryTabParamList
-> = RouteProp<PrimaryTabParamList, T>;
-
-export type PrimaryTabNavigationProp<
-  T extends keyof PrimaryTabParamList
-> = CompositeNavigationProp<
-  BottomTabNavigationProp<PrimaryTabParamList, T>,
-  StackNavigationProp<AppStackParamList>
->;
-
-export type PrimaryTabProps<T extends keyof PrimaryTabParamList> = {
-  route: PrimaryTabRouteProp<T>;
-  navigation: PrimaryTabNavigationProp<T>;
-};
-
 const Tab = createBottomTabNavigator<PrimaryTabParamList>();
 
 function PrimaryTabNavigator() {
@@ -73,25 +28,10 @@ function PrimaryTabNavigator() {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Profile" component={ProfileNavigator} />
+      <Tab.Screen name="Contact" component={ContactNavigator} />
     </Tab.Navigator>
   );
 }
-
-export type ProfileStackParamList = {
-  Profile: undefined;
-};
-
-export type ProfileRouteProp = RouteProp<ProfileStackParamList, "Profile">;
-
-export type ProfileNavigationProp = CompositeNavigationProp<
-  StackNavigationProp<ProfileStackParamList, "Profile">,
-  PrimaryTabNavigationProp<"Profile">
->;
-
-export type ProfileProps = {
-  route: ProfileRouteProp;
-  navigation: ProfileNavigationProp;
-};
 
 const StackProfile = createStackNavigator<ProfileStackParamList>();
 
@@ -102,37 +42,63 @@ function ProfileNavigator() {
     </StackProfile.Navigator>
   );
 }
+const StackContact = createStackNavigator<ContactStackParamList>();
+
+function ContactNavigator() {
+  return (
+    <StackContact.Navigator>
+      <StackContact.Screen name="Contact" component={Contact} />
+    </StackContact.Navigator>
+  );
+}
 
 export default function App() {
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      linking={{
+        enabled: true,
+        prefixes: [],
+        config: {
+          QRScanner: {
+            path: "qr-scanner",
+          },
+          Home: {
+            screens: {
+              Home: "",
+              Profile: {
+                screens: {
+                  Profile: "profile",
+                },
+              },
+              Contact: {
+                screens: {
+                  Contact: "contact",
+                },
+              },
+            },
+          },
+        },
+      }}
+    >
       <AppNavigator />
     </NavigationContainer>
   );
 }
 
-function Home(props: PrimaryTabProps<"Home">) {
+function Home() {
   return (
     <View style={styles.container}>
       <Text>Home</Text>
-      <Button
-        title="QRScanner"
-        onPress={() => props.navigation.navigate("QRScanner")}
-      />
+      <Link to="/qr-scanner">Go to QRScanner</Link>
     </View>
   );
 }
 
-function QRScanner(props: AppProps<"QRScanner">) {
+function QRScanner() {
   return (
     <View style={styles.container}>
       <Text>QRScranner</Text>
-      <Button
-        title="Profile"
-        onPress={
-          () => props.navigation.navigate("Profile") // No overload matches this call.
-        }
-      />
+      <Link to="/profile">Go to Profile</Link>
     </View>
   );
 }
@@ -141,6 +107,16 @@ function Profile() {
   return (
     <View style={styles.container}>
       <Text>Profile</Text>
+      <Link to="/qr-scanner">Go to QRScanner</Link>
+    </View>
+  );
+}
+
+function Contact() {
+  return (
+    <View style={styles.container}>
+      <Text>Contact</Text>
+      <Link to="/qr-scanner">Go to QRScanner</Link>
     </View>
   );
 }
